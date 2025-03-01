@@ -9,3 +9,4 @@ channels-redis==4.0.0   # channels-redis も同様にバージョンを合わせ
 daphne
 django-extensions
 pygraphviz
+dj-database-url==0.5.0

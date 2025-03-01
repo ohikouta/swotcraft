@@ -1,5 +1,6 @@
 from pathlib import Path
 from decouple import config  # python-decouple をインポート
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,10 +52,11 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('redis', 6379)],  # or your Redis URL
+            'hosts': [config('REDIS_URL', default='redis://localhost:6379')],
         },
     },
 }
+
 
 TEMPLATES = [
     {
@@ -73,12 +75,10 @@ TEMPLATES = [
 ]
 
 
-# Database
 DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
-        'NAME': BASE_DIR / config('DB_NAME', default='db.sqlite3'),
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default='sqlite:///db.sqlite3')
+    )
 }
 
 # Password validation
@@ -124,7 +124,8 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # フロントエンドのオリジン
-    'http://localhost:8001'
+    'http://localhost:8001',
+    'https://<app-name>.herokuapp.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
