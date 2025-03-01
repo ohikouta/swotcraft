@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
   const fetchCurrentUser = async () => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_BASE}/api/auth/login/`, {
+      const response = await fetch(`${API_BASE}/api/current-user/`, {
         credentials: 'include',
       });
       if (response.ok) {
