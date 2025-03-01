@@ -14,7 +14,8 @@ export function AuthProvider({ children }) {
   // バックエンドから現在のユーザー情報を取得する関数
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/current-user/', {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE}/api/auth/login/`, {
         credentials: 'include',
       });
       if (response.ok) {
