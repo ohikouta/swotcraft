@@ -126,10 +126,12 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # フロントエンドのオリジン
     'http://localhost:8001',
-    'https://t-mng.herokuapp.com',
-    'https://t-padpdto3b-oikotas-projects.vercel.app',
+    'https://t-mng-f8f2dda9840d.herokuapp.com',
 ]
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://t-.*\.oikotas-projects\.vercel\.app$",
+]
 
 
 CORS_ALLOW_CREDENTIALS = True
