@@ -137,10 +137,11 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 CORS_ALLOW_CREDENTIALS = True
 
 
-# 既存の設定の下あたりに追加
+
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
-    'http://localhost:8001'
+    'http://localhost:8001',
+    'https://t-it4rremre-oikotas-projects.vercel.app',
 ]
 
 LOGGING = {
