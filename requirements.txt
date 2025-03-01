@@ -8,5 +8,4 @@ channels==4.0.0         # 例：使用するバージョンに合わせて調整
 channels-redis==4.0.0   # channels-redis も同様にバージョンを合わせる
 daphne
 django-extensions
-pygraphviz
 dj-database-url==0.5.0
