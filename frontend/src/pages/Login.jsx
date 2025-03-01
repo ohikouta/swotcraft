@@ -2,6 +2,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -59,6 +60,9 @@ function Login() {
         <button type="submit">ログイン</button>
       </form>
       {message && <p>{message}</p>}
+      <p>
+        アカウントをお持ちでない場合は <Link to="/register">こちらから登録</Link>
+      </p>
     </div>
   );
 }
