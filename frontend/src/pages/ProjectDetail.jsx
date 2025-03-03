@@ -18,7 +18,7 @@ function ProjectDetail() {
     const csrfToken = getCsrfToken();
 
     // 例: Django REST Frameworkのエンドポイントが /api/projects/:id の場合
-    fetch(`${API_BASE}//api/projects/${id}/`, {
+    fetch(`${API_BASE}/api/projects/${id}/`, {
       method: 'GET',
       credentials: 'include',
       headers: {
