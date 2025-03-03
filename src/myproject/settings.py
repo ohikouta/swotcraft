@@ -1,27 +1,20 @@
-from pathlib import Path
-from decouple import config  # python-decouple をインポート
-import dj_database_url
 import os
+from pathlib import Path
+from decouple import config  # python-decouple を利用
+import dj_database_url
+import ssl
 from urllib.parse import urlparse
 import redis
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# プロジェクトのルートディレクトリを定義
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# セキュリティ設定
 SECRET_KEY = config('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
-
-# 許可するホスト
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0').split(',')
 
-
-# Application definition
+# アプリケーション定義
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,8 +22,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app',
-    'channels',
+    'app',               # あなたのアプリ
+    'channels',          # Django Channels
     'corsheaders',
     'rest_framework',
     'django_extensions',
@@ -47,39 +40,49 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'myproject.urls'     # 例
+ROOT_URLCONF = 'myproject.urls'  # プロジェクトの URL 設定
 WSGI_APPLICATION = 'myproject.wsgi.application'
 ASGI_APPLICATION = 'myproject.asgi.application'
 
-# 環境変数から Redis の接続 URL を取得
+# Redis 接続設定（Heroku Key-Value Store 用）
 redis_url = os.environ.get("REDIS_URL")
 if not redis_url:
     raise ValueError("REDIS_URL is not set in the environment.")
 
-# URL をパースして接続情報を抽出
-url = urlparse(redis_url)
-
-# Redis クライアントのインスタンスを作成（TLS接続の場合は ssl_cert_reqs を None に設定）
+parsed_url = urlparse(redis_url)
+# Redis クライアントのテスト（接続確認用）
 r = redis.Redis(
-    host=url.hostname,
-    port=url.port,
-    password=url.password,
-    ssl=(url.scheme == "rediss"),
-    ssl_cert_reqs=None  # 証明書検証を無効化（Heroku の自己署名証明書対応）
+    host=parsed_url.hostname,
+    port=parsed_url.port,
+    password=parsed_url.password,
+    ssl=(parsed_url.scheme == "rediss"),
+    ssl_cert_reqs=ssl.CERT_NONE if parsed_url.scheme == "rediss" else None,
 )
-
-# 接続確認用の PING コマンド実行
 try:
     if r.ping():
         print("Successfully connected to Heroku Key-Value Store (Redis).")
 except Exception as e:
     print("Error connecting to Redis:", e)
 
+# Django Channels 用の CHANNEL_LAYERS 設定
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [{
+                'address': redis_url,
+                'ssl': True if redis_url.startswith("rediss://") else False,
+                'ssl_cert_reqs': ssl.CERT_NONE if redis_url.startswith("rediss://") else None,
+            }],
+        },
+    },
+}
 
+# テンプレート設定
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'src/templates'],  # テンプレートパスを環境変数から取得しない場合
+        'DIRS': [BASE_DIR / 'src/templates'],  # テンプレートディレクトリ
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -92,81 +95,68 @@ TEMPLATES = [
     },
 ]
 
-
+# データベース設定
 DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL', default='sqlite:///db.sqlite3')
     )
 }
 
-# Password validation
+# パスワードバリデーション
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-# Internationalization
+# 国際化
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-us')
 TIME_ZONE = config('TIME_ZONE', default='UTC')
-
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# 静的ファイル設定
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# 認証関連の設定
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/'
 
+# Django REST Framework の設定
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        # 必要に応じて他のAuthenticationクラスも
     ],
-    # 必要に応じてPermissionやその他設定
 }
 
+# CORS 設定
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # フロントエンドのオリジン
+    'http://localhost:5173',
     'http://localhost:8001',
     'https://t-mng-f8f2dda9840d.herokuapp.com',
 ]
-
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://t-.*-oikotas-projects\.vercel\.app$"
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF 設定
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:8001',
     'https://*.vercel.app',
 ]
-
-# Cookie を HTTPS 通信のみで送信する
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-
-# SameSite=None を明示的に指定
 CSRF_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SAMESITE = 'None'
 
+# ログ設定（Heroku の標準出力へ出力）
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -182,13 +172,10 @@ LOGGING = {
         },
     },
     'loggers': {
-        # あなたのアプリのモジュール名（例: app）に対して
         'app': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        # その他のロガー（必要なら）
     },
 }
-
