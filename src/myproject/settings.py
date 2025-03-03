@@ -1,6 +1,7 @@
 from pathlib import Path
 from decouple import config  # python-decouple をインポート
 import dj_database_url
+import ssl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,11 +49,23 @@ ROOT_URLCONF = 'myproject.urls'     # 例
 WSGI_APPLICATION = 'myproject.wsgi.application'
 ASGI_APPLICATION = 'myproject.asgi.application'
 
+redis_url = config('REDIS_URL', default='redis://localhost:6379')
+
+# rediss:// なら TLS 用の設定を適用、それ以外はシンプルに URL を渡す
+if redis_url.startswith('rediss://'):
+    redis_host = {
+        'address': redis_url,
+        'ssl': True,
+        'ssl_cert_reqs': ssl.CERT_NONE,  # 証明書検証を無効化
+    }
+else:
+    redis_host = redis_url
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [config('REDIS_URL', default='redis://localhost:6379')],
+            'hosts': [redis_host],
         },
     },
 }
