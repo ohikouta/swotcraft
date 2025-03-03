@@ -141,6 +141,14 @@ CSRF_TRUSTED_ORIGINS = [
     'https://t-9btcclci5-oikotas-projects.vercel.app',
 ]
 
+# Cookie を HTTPS 通信のみで送信する
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# SameSite=None を明示的に指定
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -165,3 +173,4 @@ LOGGING = {
         # その他のロガー（必要なら）
     },
 }
+
