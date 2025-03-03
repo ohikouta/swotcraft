@@ -30,7 +30,7 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
   useEffect(() => {
     if (!user) return;
     const wsUrl = import.meta.env.VITE_WS_URL;
-    const ws = new WebSocket(`${wsUrl}//ws/swot-collab/${swotId}/`);
+    const ws = new WebSocket(`${wsUrl}/ws/swot-collab/${swotId}/`);
     setSocket(ws);
 
     ws.onopen = () => {

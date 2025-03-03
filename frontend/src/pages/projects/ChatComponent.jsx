@@ -38,7 +38,8 @@ function ChatComponent({ roomId }) {
 
   // WebSocket 接続の処理
   useEffect(() => {
-    const newSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomId}/`);
+    const wsUrl = import.meta.env.VITE_WS_URL;
+    const newSocket = new WebSocket(`${wsUrl}/ws/chat/${roomId}/`);
     setSocket(newSocket);
     
     newSocket.onopen = () => {

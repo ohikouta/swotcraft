@@ -139,7 +139,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:8001',
     'https://t-8o3d7nodi-oikotas-projects.vercel.app',
-    'https://*.oikotas-projects.vercel.app',
+    'https://*.vercel.app',
 ]
 
 # Cookie を HTTPS 通信のみで送信する
