@@ -2,6 +2,7 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../config';
 
 const LogoutButton = () => {
   const { logout } = useContext(AuthContext);
@@ -16,7 +17,7 @@ const LogoutButton = () => {
   const handleLogout = async () => {
     try {
       const csrfToken = getCsrfToken();
-      const response = await fetch('http://localhost:8000/api/auth/logout/', {
+      const response = await fetch(`${API_BASE}/api/auth/logout/`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',

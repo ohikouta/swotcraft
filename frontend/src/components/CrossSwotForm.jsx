@@ -1,5 +1,6 @@
 // src/components/CrossSwotForm.jsx
 import React, { useState } from 'react';
+import { API_BASE } from '../config';
 
 const CrossSwotForm = ({ onSuccess, parentSwotOptions = [] }) => {
   // 親SWOT選択用（親SWOTのIDを保持）
@@ -55,7 +56,7 @@ const CrossSwotForm = ({ onSuccess, parentSwotOptions = [] }) => {
       };
       const csrfToken = getCsrfToken();
 
-      const response = await fetch('http://localhost:8000/api/cross-swot/', {
+      const response = await fetch(`${API_BASE}/api/cross-swot/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

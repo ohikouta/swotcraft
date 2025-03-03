@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { API_BASE } from '../config';
 import InviteMember from './projects/InviteMember';
 import ChatComponent from './projects/ChatComponent';
-// 既存のSWOT, クロスSWOTのフォームはここでは表示せず、SWOT編集ページへ遷移する導線を追加する
-// import SWOTForm from '../components/SwotForm';
-// import CrossSwotForm from '../components/CrossSwotForm';
+
 
 function ProjectDetail() {
   const { id } = useParams();   // ルートパラメータからidを取得
@@ -19,7 +18,7 @@ function ProjectDetail() {
     const csrfToken = getCsrfToken();
 
     // 例: Django REST Frameworkのエンドポイントが /api/projects/:id の場合
-    fetch(`http://localhost:8000/api/projects/${id}/`, {
+    fetch(`${API_BASE}//api/projects/${id}/`, {
       method: 'GET',
       credentials: 'include',
       headers: {

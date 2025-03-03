@@ -1,5 +1,7 @@
 // InviteMember.jsx
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../../config';
+
 
 function InviteMember({ projectId, token }) {
   const [users, setUsers] = useState([]);
@@ -16,7 +18,7 @@ function InviteMember({ projectId, token }) {
     const csrfToken = getCsrfToken();
 
     // 例: 登録ユーザー一覧を取得するエンドポイントがある場合
-    fetch('http://localhost:8000/api/users/', {
+    fetch(`${API_BASE}/api/users/`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -30,7 +32,7 @@ function InviteMember({ projectId, token }) {
   }, [token]);
 
   const handleInvite = () => {
-    fetch(`http://localhost:8000/api/projects/${projectId}/invite-member/`, {
+    fetch(`${API_BASE}/api/projects/${projectId}/invite-member/`, {
       method: 'POST',
       credentials: 'include',
       headers: {

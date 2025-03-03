@@ -1,5 +1,6 @@
-// src/Register.jsx
 import { useState } from 'react';
+import { API_BASE } from '../config';
+
 
 function Register() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -12,8 +13,6 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      console.log("Register: API_BASE =", API_BASE);
       const response = await fetch(`${API_BASE}/api/auth/register/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

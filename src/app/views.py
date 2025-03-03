@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.middleware.csrf import get_token
 
 
 # DRF
@@ -30,11 +31,12 @@ logger = logging.getLogger(__name__)
 
 @ensure_csrf_cookie
 def csrf_token_view(request):
-    """
-    このエンドポイントにアクセスすると、ブラウザに CSRF クッキーがセットされます。
-    """
-    return JsonResponse({'detail': 'CSRF cookie has been set'})
-
+    # get_token関数でCSRFトークンを取得
+    csrf_token = get_token(request)
+    return JsonResponse({
+        'detail': 'CSRF cookie has been set',
+        'csrfToken': csrf_token,
+    })
 User = get_user_model()
 
 class UserListView(generics.ListAPIView):

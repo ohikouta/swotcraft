@@ -1,5 +1,7 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
+import { API_BASE } from '../config';
+
 
 export const AuthContext = createContext();
 
@@ -14,7 +16,6 @@ export function AuthProvider({ children }) {
   // バックエンドから現在のユーザー情報を取得する関数
   const fetchCurrentUser = async () => {
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await fetch(`${API_BASE}/api/current-user/`, {
         credentials: 'include',
       });

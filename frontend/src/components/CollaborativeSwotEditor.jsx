@@ -29,7 +29,8 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
 
   useEffect(() => {
     if (!user) return;
-    const ws = new WebSocket(`ws://localhost:8000/ws/swot-collab/${swotId}/`);
+    const wsUrl = import.meta.env.VITE_WS_URL;
+    const ws = new WebSocket(`${wsUrl}//ws/swot-collab/${swotId}/`);
     setSocket(ws);
 
     ws.onopen = () => {
@@ -200,10 +201,10 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
     };
     try {
       const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1];
-      // swotId が定義されていれば更新用エンドポイント、未定義なら作成用エンドポイントを使用
-      const endpoint = swotId 
-        ? `http://localhost:8000/api/projects/${projectId}/swot/${swotId}/`
-        : `http://localhost:8000/api/projects/${projectId}/swot/`;
+        const baseUrl = import.meta.env.VITE_API_URL;
+        const endpoint = swotId
+          ? `${baseUrl}/api/projects/${projectId}/swot/${swotId}/`
+          : `${baseUrl}/api/projects/${projectId}/swot/`;
       const method = swotId ? "PUT" : "POST";
 
       const response = await fetch(endpoint, {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../config';
 import SWOTForm from '../components/SwotForm';
 import CrossSwotForm from '../components/CrossSwotForm';
 
@@ -14,7 +15,7 @@ const SwotPage = () => {
   const fetchSwotList = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/swot-analysis/', {
+      const response = await fetch(`${API_BASE}/api/swot-analysis/`, {
         credentials: 'include',
       });
       if (!response.ok) {
@@ -31,7 +32,7 @@ const SwotPage = () => {
 
   const fetchCrossSwotList = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/cross-swot/', {
+      const response = await fetch(`${API_BASE}/api/cross-swot/`, {
         credentials: 'include',
       });
       if (!response.ok) {

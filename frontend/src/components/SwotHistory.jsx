@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_BASE } from '../config';
 
 function SwotHistory() {
   const { project_id, swot_id } = useParams();
@@ -9,7 +10,7 @@ function SwotHistory() {
 
   useEffect(() => {
     // 例として、変更履歴取得用エンドポイントにリクエスト
-    fetch(`http://localhost:8000/api/projects/${project_id}/swot/${swot_id}/history/`, {
+    fetch(`${API_BASE}/api/projects/${project_id}/swot/${swot_id}/history/`, {
       method: 'GET',
       credentials: 'include',
       headers: {

@@ -3,6 +3,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../config';
 
 function Login() {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -22,7 +23,6 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const csrfToken = getCsrfToken();
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
     const response = await fetch(`${API_BASE}/api/auth/login/`, {
       method: 'POST',

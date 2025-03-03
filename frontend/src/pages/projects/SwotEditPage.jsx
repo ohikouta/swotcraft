@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_BASE } from '../../config';
 import CollaborativeSwotEditor from '../../components/CollaborativeSwotEditor';
 
 function SwotEditPage() {
@@ -8,7 +9,7 @@ function SwotEditPage() {
 
     useEffect(() => {
         if (swot_id) {
-            fetch(`http://localhost:8000/api/projects/${project_id}/swot/${swot_id}`, {
+            fetch(`${API_BASE}/api/projects/${project_id}/swot/${swot_id}`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {

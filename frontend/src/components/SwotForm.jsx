@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { API_BASE } from '../config';
+
 
 const SwotForm = ({ onSuccess }) => {
   const [title, setTitle] = useState('');
@@ -47,7 +49,7 @@ const SwotForm = ({ onSuccess }) => {
       
       const csrfToken = getCsrfToken();
       // fetch を使って POST リクエストを送信
-      const response = await fetch('http://localhost:8000/api/swot-analysis/', {
+      const response = await fetch(`${API_BASE}/api/swot-analysis/`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

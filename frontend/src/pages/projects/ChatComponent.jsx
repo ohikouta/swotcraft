@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
+import { API_BASE } from '../../config';
+
 
 function ChatComponent({ roomId }) {
   const { user, loading } = useContext(AuthContext);
@@ -15,7 +17,7 @@ function ChatComponent({ roomId }) {
     console.log("Fetching chat history, current user:", user);
     async function fetchChatHistory() {
       try {
-        const response = await fetch(`http://localhost:8000/api/chat/${roomId}/messages/`, {
+        const response = await fetch(`${API_BASE}/api/chat/${roomId}/messages/`, {
           credentials: 'include'
         });
         if (response.ok) {
