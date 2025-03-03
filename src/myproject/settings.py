@@ -1,7 +1,9 @@
 from pathlib import Path
 from decouple import config  # python-decouple をインポート
 import dj_database_url
-import ssl
+import os
+from urllib.parse import urlparse
+import redis
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,22 +51,29 @@ ROOT_URLCONF = 'myproject.urls'     # 例
 WSGI_APPLICATION = 'myproject.wsgi.application'
 ASGI_APPLICATION = 'myproject.asgi.application'
 
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
+# 環境変数から Redis の接続 URL を取得
+redis_url = os.environ.get("REDIS_URL")
+if not redis_url:
+    raise ValueError("REDIS_URL is not set in the environment.")
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [{
-                'address': config('REDIS_URL'),  # 例: rediss://:password@ec2-xx-xx-xx-xx.compute-1.amazonaws.com:16379
-                'ssl': True,
-                'ssl_context': ssl_context,
-            }],
-        },
-    },
-}
+# URL をパースして接続情報を抽出
+url = urlparse(redis_url)
+
+# Redis クライアントのインスタンスを作成（TLS接続の場合は ssl_cert_reqs を None に設定）
+r = redis.Redis(
+    host=url.hostname,
+    port=url.port,
+    password=url.password,
+    ssl=(url.scheme == "rediss"),
+    ssl_cert_reqs=None  # 証明書検証を無効化（Heroku の自己署名証明書対応）
+)
+
+# 接続確認用の PING コマンド実行
+try:
+    if r.ping():
+        print("Successfully connected to Heroku Key-Value Store (Redis).")
+except Exception as e:
+    print("Error connecting to Redis:", e)
 
 
 TEMPLATES = [
