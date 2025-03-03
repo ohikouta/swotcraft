@@ -138,7 +138,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:8001',
-    'https://.oikotas-projects.vercel.app',
+    'https://t-9btcclci5-oikotas-projects.vercel.app',
 ]
 
 LOGGING = {

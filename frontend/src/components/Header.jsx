@@ -2,6 +2,7 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../config';
 
 // 共通の CSRF トークン取得関数
 const getCsrfToken = () => {
@@ -15,7 +16,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       const csrfToken = getCsrfToken();
-      const response = await fetch('http://localhost:8000/api/auth/logout/', {
+      const response = await fetch(`${API_BASE}/api/auth/logout/`, {
         method: 'POST',
         credentials: 'include',
         headers: {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import LogoutButton from '../components/LogoutButton';
+import { API_BASE } from '../config';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProjectList from '../components/ProjectList';
@@ -16,10 +16,15 @@ function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const getCsrfToken = () => {
+    const match = document.cookie.match(/csrftoken=([\w-]+)/);
+    return match ? match[1] : null;
+  };
+
 
   useEffect(() => {
     // CSRFトークンセット用エンドポイントにアクセス
-    fetch('http://localhost:8000/api/csrf/', {
+    fetch(`${API_BASE}/api/csrf/`, {
       method: 'GET',
       credentials: 'include'
     })
@@ -33,9 +38,14 @@ function Dashboard() {
   }, []);
 
   const fetchProjects = async () => {
+    const csrfToken = getCsrfToken();
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/projects/', {
+      const response = await fetch(`${API_BASE}/api/projects/`, {
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
         credentials: 'include'
       });
       if (!response.ok) {
