@@ -49,23 +49,19 @@ ROOT_URLCONF = 'myproject.urls'     # 例
 WSGI_APPLICATION = 'myproject.wsgi.application'
 ASGI_APPLICATION = 'myproject.asgi.application'
 
-redis_url = config('REDIS_URL', default='redis://localhost:6379')
-
-# rediss:// なら TLS 用の設定を適用、それ以外はシンプルに URL を渡す
-if redis_url.startswith('rediss://'):
-    redis_host = {
-        'address': redis_url,
-        'ssl': True,
-        'ssl_cert_reqs': ssl.CERT_NONE,  # 証明書検証を無効化
-    }
-else:
-    redis_host = redis_url
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [redis_host],
+            'hosts': [{
+                'address': config('REDIS_URL'),  # 例: rediss://:password@ec2-xx-xx-xx-xx.compute-1.amazonaws.com:16379
+                'ssl': True,
+                'ssl_context': ssl_context,
+            }],
         },
     },
 }
