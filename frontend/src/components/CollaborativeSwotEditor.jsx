@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 
+const API_BASE = import.meta.env.VITE_API_URL; // 環境変数などで設定している前提
+
 // ユーザーごとの色を決める関数例（簡単なハッシュからカラーを算出）
 const getUserColor = (username) => {
   const colors = ['#FF5733', '#33C3FF', '#9D33FF', '#33FF57', '#FFC300'];
@@ -26,7 +28,31 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
   const [socket, setSocket] = useState(null);
   // 編集状態を管理する state。キーは「category-index」、値は { username, color }。
   const [editingState, setEditingState] = useState({});
+  // CSRF トークン用の state
+  const [csrfToken, setCsrfToken] = useState(null);
 
+  // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/csrf/`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.csrfToken) {
+          setCsrfToken(data.csrfToken);
+        } else {
+          console.error('CSRF token not provided in response JSON.');
+        }
+      } catch (error) {
+        console.error('CSRF token fetch error:', error);
+      }
+    };
+    fetchCsrfToken();
+  }, []);
+
+  // WebSocketの初期化
   useEffect(() => {
     if (!user) return;
     const wsUrl = import.meta.env.VITE_WS_URL;
@@ -44,15 +70,24 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      // 自分の送信した内容であれば無視する（エコー対策）
+      if (data.username === user.username) return;
+
       switch (data.type) {
         case "update_title":
-          setTitle(data.title);
+          // 受信タイトルが現在のタイトルと同じ場合は更新しない
+          if (data.title !== title) {
+            setTitle(data.title);
+          }
           break;
         case "update_item":
           setItems(prevItems => {
             const updated = { ...prevItems };
             if (updated[data.category]) {
-              updated[data.category][data.index] = data.content;
+              // もし同じ内容でなければ更新
+              if (updated[data.category][data.index] !== data.content) {
+                updated[data.category][data.index] = data.content;
+              }
             }
             return updated;
           });
@@ -92,7 +127,7 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
       }
       ws.close();
     };
-  }, [swotId, user]);
+  }, [swotId, user, title]); // titleを依存に追加するかどうかは注意（無限ループに注意）
 
   // タイトル変更時にリアルタイム送信
   const handleTitleChange = (e) => {
@@ -110,7 +145,6 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
   // 各アイテム変更時のハンドラー
   const handleItemChange = (category, index, value) => {
     const updatedItems = { ...items };
-    // 既存アイテムがオブジェクトの場合は content を更新、文字列の場合は直接更新
     if (typeof updatedItems[category][index] === 'object') {
       updatedItems[category][index] = { ...updatedItems[category][index], content: value };
     } else {
@@ -142,10 +176,9 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
     setItems(updatedItems);
   };
 
-  // 編集開始（個々の入力フィールドで呼び出す）
+  // 編集開始
   const startEditingField = (category, index) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const fieldKey = `${category}-${index}`;
       const color = getUserColor(user.username);
       socket.send(JSON.stringify({
         type: "editing_field",
@@ -158,7 +191,7 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
     }
   };
 
-  // 編集終了（個々の入力フィールドで呼び出す）
+  // 編集終了
   const stopEditingField = (category, index) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({
@@ -173,13 +206,12 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
 
   // 保存ボタンのハンドラー
   const handleSave = async () => {
-    // items のオブジェクトをリスト形式に変換
+    // items をリスト形式に変換
     const transformedItems = [];
     for (const category in items) {
       items[category].forEach(item => {
         if (typeof item === 'object') {
           if (item.content && item.content.trim() !== '') {
-            // 既存アイテムの場合、ID があるならそれも含める
             if (item.id) {
               transformedItems.push({ id: item.id, category, content: item.content });
             } else {
@@ -199,12 +231,16 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
       items: transformedItems,
       project: projectId,
     };
+
+    if (!csrfToken) {
+      console.error('CSRF token is not available.');
+      return;
+    }
+
     try {
-      const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1];
-        const baseUrl = import.meta.env.VITE_API_URL;
-        const endpoint = swotId
-          ? `${baseUrl}/api/projects/${projectId}/swot/${swotId}/`
-          : `${baseUrl}/api/projects/${projectId}/swot/`;
+      const endpoint = swotId
+        ? `${API_BASE}/api/projects/${projectId}/swot/${swotId}/`
+        : `${API_BASE}/api/projects/${projectId}/swot/`;
       const method = swotId ? "PUT" : "POST";
 
       const response = await fetch(endpoint, {
@@ -242,10 +278,9 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
           {items[category].map((item, index) => {
             const fieldKey = `${category}-${index}`;
             const editingInfo = editingState[fieldKey];
-            // ここで item が文字列の場合は直接表示、オブジェクトの場合は item.content を表示
             const value = typeof item === 'object' ? item.content : item;
             return (
-              <div key={index} style={{ marginBottom: '10px', position: 'relative', paddingRight: '24px' }}>
+              <div key={fieldKey} style={{ marginBottom: '10px', position: 'relative', paddingRight: '24px' }}>
                 {editingInfo && (
                   <div style={{
                     position: 'absolute',
@@ -273,7 +308,6 @@ function CollaborativeSwotEditor({ swotId, projectId, initialTitle, initialItems
                   onFocus={() => startEditingField(category, index)}
                   onBlur={() => stopEditingField(category, index)}
                 />
-                {/* 削除ボタン。ここでは常時表示していますが、CSSで hover 時に表示するように調整可能です */}
                 <button 
                   onClick={() => handleDeleteItem(category, index)}
                   style={{

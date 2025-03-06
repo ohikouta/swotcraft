@@ -8,15 +8,30 @@ import ChatComponent from './projects/ChatComponent';
 function ProjectDetail() {
   const { id } = useParams();   // ルートパラメータからidを取得
   const [project, setProject] = useState(null);
-
-  const getCsrfToken = () => {
-    const match = document.cookie.match(/csrftoken=([\w-]+)/);
-    return match ? match[1] : null;
-  };
+  const [csrfToken, setCsrfToken] = useState(null);
+  
+    // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
+    useEffect(() => {
+      const fetchCsrfToken = async () => {
+        try {
+          const response = await fetch(`${API_BASE}/api/csrf/`, {
+            method: 'GET',
+            credentials: 'include'
+          });
+          const data = await response.json();
+          if (data.csrfToken) {
+            setCsrfToken(data.csrfToken);
+          } else {
+            console.error('CSRF token not provided in response JSON.');
+          }
+        } catch (error) {
+          console.error('CSRF token fetch error:', error);
+        }
+      };
+      fetchCsrfToken();
+    }, []);
 
   useEffect(() => {
-    const csrfToken = getCsrfToken();
-
     // 例: Django REST Frameworkのエンドポイントが /api/projects/:id の場合
     fetch(`${API_BASE}/api/projects/${id}/`, {
       method: 'GET',

@@ -6,17 +6,30 @@ import { API_BASE } from '../../config';
 function InviteMember({ projectId, token }) {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
-
-  // CSRFトークンを取得する関数
-  const getCsrfToken = () => {
-    const match = document.cookie.match(/csrftoken=([\w-]+)/);
-    return match ? match[1] : null;
-  };
+  const [csrfToken, setCsrfToken] = useState(null);
+  
+  // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/csrf/`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.csrfToken) {
+          setCsrfToken(data.csrfToken);
+        } else {
+          console.error('CSRF token not provided in response JSON.');
+        }
+      } catch (error) {
+        console.error('CSRF token fetch error:', error);
+      }
+    };
+    fetchCsrfToken();
+  }, []);
 
   useEffect(() => {
-
-    const csrfToken = getCsrfToken();
-
     // 例: 登録ユーザー一覧を取得するエンドポイントがある場合
     fetch(`${API_BASE}/api/users/`, {
       method: 'GET',
@@ -37,7 +50,7 @@ function InviteMember({ projectId, token }) {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken(),
+        'X-CSRFToken': csrfToken,
       },
       body: JSON.stringify({ user_id: selectedUser })
     })
