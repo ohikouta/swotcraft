@@ -1,6 +1,6 @@
-# django-project
+# SwotCraft
 
-Django (DRF + Channels) + React (Vite) で構成された共同編集・チャット機能付きプロジェクト管理サービス。
+戦略分析フレームワーク（SWOT / 4P / クロス SWOT）をリアルタイム共同編集できるプロジェクト管理サービス。Django (DRF + Channels) + React (Vite) 構成。
 
 ## 技術スタック
 
@@ -44,7 +44,7 @@ docker-compose up --build
 ```bash
 # Backend
 pip install -r requirements.txt
-cd src && python manage.py migrate && daphne myproject.asgi:application --port 8000
+cd src && python manage.py migrate && daphne config.asgi:application --port 8000
 
 # Frontend
 cd frontend && npm install && npm run dev
@@ -69,7 +69,7 @@ redis-server
 
 ### Backend (Heroku)
 
-- `Procfile`: `daphne myproject.asgi:application`
+- `Procfile`: `daphne config.asgi:application`
 - Heroku Postgres + Heroku Key-Value Store アドオン前提
 - buildpack: Python
 
@@ -84,7 +84,7 @@ redis-server
 .
 ├── src/                 Django プロジェクト
 │   ├── app/             単一アプリ（モデル・ビュー・consumer）
-│   └── myproject/       設定・URL・ASGI
+│   └── config/          設定・URL・ASGI
 ├── frontend/            React アプリ
 │   └── src/
 │       ├── pages/       ルート単位の画面

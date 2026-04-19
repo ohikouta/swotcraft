@@ -4,11 +4,11 @@ services:
       context: .
       dockerfile: containers/Dockerfile  # Django 用の Dockerfile
     environment:
-      - DJANGO_SETTINGS_MODULE=myproject.settings
+      - DJANGO_SETTINGS_MODULE=config.settings
       - PYTHONPATH=/app/src
       # 例えば追加
       - REDIS_HOST=redis
-    command: daphne -b 0.0.0.0 -p 8000 myproject.asgi:application
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
       - .:/app
     ports:
