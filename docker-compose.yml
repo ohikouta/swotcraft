@@ -1,14 +1,35 @@
-version: '3'
-
 services:
-  web:
+  backend:
     build:
       context: .
-      dockerfile: containers/Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
+      dockerfile: containers/Dockerfile  # Django 用の Dockerfile
+    environment:
+      - DJANGO_SETTINGS_MODULE=myproject.settings
+      - PYTHONPATH=/app/src
+      # 例えば追加
+      - REDIS_HOST=redis
+    command: daphne -b 0.0.0.0 -p 8000 myproject.asgi:application
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     env_file:
       - .env
+    depends_on:
+      - redis  # Redis コンテナが先に起動している必要がある
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile  # React 用の Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    ports:
+      - "5173:5173"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
