@@ -6,8 +6,9 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
       - PYTHONPATH=/app/src
-      # 例えば追加
-      - REDIS_HOST=redis
+      # docker-compose 内では Redis サービス名 "redis" で接続する
+      # (.env 側の REDIS_URL より優先される)
+      - REDIS_URL=redis://redis:6379
     command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
       - .:/app

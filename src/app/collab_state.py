@@ -13,6 +13,8 @@
 どちらも TTL を設定し、クライアント異常切断でロックが残存しても
 一定時間で自動クリーンアップされる。
 """
+from __future__ import annotations
+
 import json
 import os
 import ssl

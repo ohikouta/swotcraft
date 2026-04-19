@@ -1,5 +1,5 @@
-# Pythonイメージをベースにする
-FROM python:3.9.11
+# Pythonイメージをベースにする（runtime.txt の python-3.10.12 と合わせる）
+FROM python:3.10.12
 
 # 環境変数（出力をバッファリングしない）
 ENV PYTHONUNBUFFERED 1
