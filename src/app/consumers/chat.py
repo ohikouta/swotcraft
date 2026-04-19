@@ -29,15 +29,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # WebSocket からメッセージを受け取ったとき
     async def receive(self, text_data):
-        print("あーーーー")
         data = json.loads(text_data)
         message = data['message']
-        # ここでは、クライアントから sender を送信しない前提で、
-        # 認証済みユーザーを sender として利用する方法
+        # 認証済みユーザーのみ保存・ブロードキャスト。
+        # 未認証リクエストで Anonymous 等の User 行を勝手に作らない。
         user = self.scope.get("user")
-        sender_username = user.username if user and user.is_authenticated else "Anonymous"
+        if not (user and user.is_authenticated):
+            return
+        sender_username = user.username
 
-        await self.save_message(self.room_name, sender_username, message)
+        await self.save_message(self.room_name, user, message)
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -60,9 +61,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def save_message(self, room_name, sender_username, message):
-        print(f"Saving message: room={room_name}, sender={sender_username}, message={message}")
-        # チャットルームの取得（存在しない場合は作成する等の処理も可能）
-        room, created = ChatRoom.objects.get_or_create(name=room_name)
-        sender, _ = User.objects.get_or_create(username=sender_username)
+    def save_message(self, room_name, sender, message):
+        # ChatRoom.room_type は必須フィールドなので defaults で指定。
+        # room が未作成の場合のみ作成される。
+        room, _ = ChatRoom.objects.get_or_create(
+            name=room_name,
+            defaults={'room_type': 'project'},
+        )
         ChatMessage.objects.create(room=room, sender=sender, message=message)
