@@ -9,7 +9,7 @@ function SwotEditPage() {
 
     useEffect(() => {
         if (swot_id) {
-            fetch(`${API_BASE}/api/projects/${project_id}/swot/${swot_id}`, {
+            fetch(`${API_BASE}/api/projects/${project_id}/swot/${swot_id}/`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
