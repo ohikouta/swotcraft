@@ -45,7 +45,8 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 ASGI_APPLICATION = 'myproject.asgi.application'
 
 # Redis 接続設定（Heroku Key-Value Store 用）
-redis_url = os.environ.get("REDIS_URL")
+redis_url = config("REDIS_URL")
+
 if not redis_url:
     raise ValueError("REDIS_URL is not set in the environment.")
 
