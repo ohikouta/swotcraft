@@ -60,7 +60,10 @@ redis-server
 pip install -r requirements-dev.txt
 pytest
 
-# Frontend（後続 PR で vitest 導入予定）
+# Frontend（vitest）
+cd frontend && npm test
+
+# Frontend Lint / Format
 cd frontend && npm run lint
 cd frontend && npm run format:check
 ```
