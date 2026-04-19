@@ -1,3 +1,6 @@
+# Manually added for Django 4.2.7 on 2026-04-19
+# models.py の SwotHistory モデルに対応する migration が欠落していたため手動で補完。
+
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
