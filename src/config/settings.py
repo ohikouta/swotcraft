@@ -40,9 +40,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'myproject.urls'  # プロジェクトの URL 設定
-WSGI_APPLICATION = 'myproject.wsgi.application'
-ASGI_APPLICATION = 'myproject.asgi.application'
+ROOT_URLCONF = 'config.urls'  # プロジェクトの URL 設定
+WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 # Redis 接続設定（Heroku Key-Value Store 用）
 redis_url = config("REDIS_URL")
