@@ -47,9 +47,11 @@ class SwotCollabConsumer(AsyncWebsocketConsumer):
         await remove_editing_user(self.swot_id, self.username)
         removed_fields = await remove_all_fields_by_user(self.swot_id, self.username)
 
+        # 編集中ユーザー一覧を再ブロードキャストして他クライアントの表示を更新
+        await self._send_editing_users()
+
         # 解除した各フィールドロックをグループに通知（残存表示を消すため）
         for field_key in removed_fields:
-            category, _, index = field_key.partition("-")
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -96,14 +98,12 @@ class SwotCollabConsumer(AsyncWebsocketConsumer):
                 }
             )
         elif event_type == "editing_start":
-            username = data.get("username")
-            if username:
-                await add_editing_user(self.swot_id, username)
+            # ユーザー名はクライアント送信値ではなく self.username を使う
+            # (偽装と disconnect クリーンアップとの不整合を防ぐ)
+            await add_editing_user(self.swot_id, self.username)
             await self._send_editing_users()
         elif event_type == "editing_stop":
-            username = data.get("username")
-            if username:
-                await remove_editing_user(self.swot_id, username)
+            await remove_editing_user(self.swot_id, self.username)
             await self._send_editing_users()
         elif event_type == "editing_field":
             await self._handle_editing_field(data)
@@ -162,10 +162,16 @@ class SwotCollabConsumer(AsyncWebsocketConsumer):
         status = data.get("status")
         category = data.get("category")
         index = data.get("index")
-        username = data.get("username")
         color = data.get("color")
 
+        # category / index が欠けている不正ペイロードは無視
+        # (None-None のような壊れた field_key を Redis に残さない)
+        if category is None or index is None:
+            return
+
         field_key = f"{category}-{index}"
+        # ユーザー名はクライアント送信値ではなく self.username を使う
+        username = self.username
 
         if status == "start":
             await set_field_editor(self.swot_id, field_key, username, color)

@@ -18,7 +18,6 @@ from __future__ import annotations
 import json
 import os
 import ssl
-from urllib.parse import urlparse
 
 from redis.asyncio import Redis
 
@@ -30,19 +29,21 @@ _client: Redis | None = None
 
 
 def get_redis_client() -> Redis:
-    """プロセス内で共有する非同期 Redis クライアントを返す。"""
+    """プロセス内で共有する非同期 Redis クライアントを返す。
+
+    `Redis.from_url()` を使うことで REDIS_URL の DB 番号 (`/0`, `/1` など)、
+    ポート省略、ユーザー認証情報などを一括で正しく解釈する。
+    """
     global _client
     if _client is None:
         url = os.environ.get("REDIS_URL", "redis://localhost:6379")
-        parsed = urlparse(url)
-        _client = Redis(
-            host=parsed.hostname,
-            port=parsed.port,
-            password=parsed.password,
-            ssl=(parsed.scheme == "rediss"),
-            ssl_cert_reqs=ssl.CERT_NONE if parsed.scheme == "rediss" else None,
-            decode_responses=True,
-        )
+        ssl_kwargs: dict = {}
+        if url.startswith("rediss://"):
+            # NOTE: Heroku Key-Value Store の証明書チェーンが完全でない問題への
+            # 暫定対応として検証を無効化している。Phase D (Issue #6) の
+            # セキュリティ固めで CA 明示 + CERT_REQUIRED に切り替える予定。
+            ssl_kwargs["ssl_cert_reqs"] = ssl.CERT_NONE
+        _client = Redis.from_url(url, decode_responses=True, **ssl_kwargs)
     return _client
 
 

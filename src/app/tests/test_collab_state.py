@@ -69,7 +69,7 @@ async def test_remove_all_fields_by_user(fake_redis):
 
     assert set(removed) == {"Strength-0", "Strength-1"}
     remaining = await fake_redis.hgetall("swot:42:field_editors")
-    assert list(remaining.keys()) == ["Weakness-0"]
+    assert set(remaining.keys()) == {"Weakness-0"}
 
 
 @pytest.mark.asyncio
