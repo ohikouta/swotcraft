@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { API_BASE } from '../config';
 import InviteMember from './projects/InviteMember';
 import ChatComponent from './projects/ChatComponent';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 
 function ProjectDetail() {
@@ -52,6 +54,7 @@ function ProjectDetail() {
 
   return (
     <div>
+      <Header />
       <h2>プロジェクト詳細</h2>
       <p>プロジェクト名: {project.name}</p>
       <p>開始日: {project.start_date}</p>
@@ -89,6 +92,7 @@ function ProjectDetail() {
 
       <h3>チャット</h3>
       <ChatComponent roomId={project.id} />
+      <Footer />
     </div>
   );
 }
