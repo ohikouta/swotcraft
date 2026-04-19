@@ -30,6 +30,7 @@ function InviteMember({ projectId, token }) {
   }, []);
 
   useEffect(() => {
+    if (!csrfToken) return;
     // 例: 登録ユーザー一覧を取得するエンドポイントがある場合
     fetch(`${API_BASE}/api/users/`, {
       method: 'GET',
@@ -42,7 +43,7 @@ function InviteMember({ projectId, token }) {
       .then(response => response.json())
       .then(data => setUsers(data))
       .catch(error => console.error('Error fetching users:', error));
-  }, [token]);
+  }, [csrfToken]);
 
   const handleInvite = () => {
     fetch(`${API_BASE}/api/projects/${projectId}/invite-member/`, {
