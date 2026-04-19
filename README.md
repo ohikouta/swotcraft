@@ -53,6 +53,18 @@ cd frontend && npm install && npm run dev
 redis-server
 ```
 
+## テスト
+
+```bash
+# Backend（pytest）
+pip install -r requirements-dev.txt
+pytest
+
+# Frontend（後続 PR で vitest 導入予定）
+cd frontend && npm run lint
+cd frontend && npm run format:check
+```
+
 ## 環境変数
 
 `.env.example` を参照。主要な変数：
