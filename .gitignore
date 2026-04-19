@@ -9,6 +9,7 @@ db.sqlite3
 
 # Django静的ファイル
 /static/
+src/staticfiles/
 
 # Docker関連
 *.log
