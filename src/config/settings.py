@@ -51,19 +51,21 @@ if not redis_url:
     raise ValueError("REDIS_URL is not set in the environment.")
 
 parsed_url = urlparse(redis_url)
-# Redis クライアントのテスト（接続確認用）
-r = redis.Redis(
-    host=parsed_url.hostname,
-    port=parsed_url.port,
-    password=parsed_url.password,
-    ssl=(parsed_url.scheme == "rediss"),
-    ssl_cert_reqs=ssl.CERT_NONE if parsed_url.scheme == "rediss" else None,
-)
-try:
-    if r.ping():
-        print("Successfully connected to Heroku Key-Value Store (Redis).")
-except Exception as e:
-    print("Error connecting to Redis:", e)
+
+# テスト環境など Redis 実接続確認が不要な場合は SKIP_REDIS_CHECK=1 を設定する
+if not config("SKIP_REDIS_CHECK", default=False, cast=bool):
+    r = redis.Redis(
+        host=parsed_url.hostname,
+        port=parsed_url.port,
+        password=parsed_url.password,
+        ssl=(parsed_url.scheme == "rediss"),
+        ssl_cert_reqs=ssl.CERT_NONE if parsed_url.scheme == "rediss" else None,
+    )
+    try:
+        if r.ping():
+            print("Successfully connected to Heroku Key-Value Store (Redis).")
+    except Exception as e:
+        print("Error connecting to Redis:", e)
 
 # Django Channels 用の CHANNEL_LAYERS 設定
 CHANNEL_LAYERS = {
