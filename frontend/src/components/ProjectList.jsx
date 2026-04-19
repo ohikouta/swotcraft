@@ -9,7 +9,6 @@ const projectListContainerStyle = {
 const tableConntainerStyle = {
     marginBottom: '20px',
     width: '80%',
-    justyfyContent: 'center',
 }
 
 const thStyle = {
