@@ -11,20 +11,6 @@ class UserProfile(models.Model):
     # 他に必要なフィールドがあれば追加します
 
 
-class SWOT(models.Model):
-    title = models.CharField(max_length=100)
-
-class SwotIdeas(models.Model):
-    swot = models.ForeignKey(SWOT, on_delete=models.CASCADE)
-    category_choices = (
-        ('Strength', 'Strength'),
-        ('Weakness', "Weakness"),
-        ('Opportunity', 'Opportunity'),
-        ('Threat', 'Threat'),
-    )
-    category = models.CharField(max_length=20, choices=category_choices)
-    content = models.CharField(max_length=300)
-
 class FourPAnalysis(models.Model):
     overview = models.TextField(verbose_name="概要", blank=True)       # 追加例
     memo = models.TextField(verbose_name="プロジェクトメモ", blank=True)  # 追加例
