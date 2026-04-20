@@ -15,9 +15,12 @@ function ChatComponent({ roomId }) {
   // チャット履歴のロード
   useEffect(() => {
     if (!roomId) {
+      setMessages([]);
       setLoadingHistory(false);
       return;
     }
+    setLoadingHistory(true);
+    setMessages([]);
     console.log("Fetching chat history, current user:", user);
     async function fetchChatHistory() {
       try {

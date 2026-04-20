@@ -11,6 +11,7 @@ function ProjectDetail() {
   const { id } = useParams();   // ルートパラメータからidを取得
   const [project, setProject] = useState(null);
   const [csrfToken, setCsrfToken] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   
     // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
     useEffect(() => {
@@ -34,20 +35,37 @@ function ProjectDetail() {
     }, []);
 
   useEffect(() => {
-    // 例: Django REST Frameworkのエンドポイントが /api/projects/:id の場合
+    setFetchError(null);
+    setProject(null);
     fetch(`${API_BASE}/api/projects/${id}/`, {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken,
       }
     })
-      .then(response => response.json())
-      .then(data => setProject(data))
-      .catch(error => console.error('Error fetching project:', error));
+      .then(async response => {
+        if (!response.ok) {
+          setFetchError({ status: response.status });
+          return;
+        }
+        const data = await response.json();
+        setProject(data);
+      })
+      .catch(error => {
+        console.error('Error fetching project:', error);
+        setFetchError({ message: error.message });
+      });
   }, [id]);
 
+  if (fetchError) {
+    return (
+      <p>
+        プロジェクトを読み込めませんでした
+        {fetchError.status ? `（HTTP ${fetchError.status}）` : ''}
+      </p>
+    );
+  }
   if (!project?.id) {
     return <p>Loading...</p>;
   }
