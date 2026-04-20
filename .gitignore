@@ -20,3 +20,6 @@ src/staticfiles/
 # IDE/エディタ関連
 .idea/
 *.swp
+
+# Playwright MCP artifacts
+.playwright-mcp/
