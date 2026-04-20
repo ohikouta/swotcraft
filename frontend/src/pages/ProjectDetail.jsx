@@ -10,30 +10,10 @@ import Footer from '../components/Footer';
 function ProjectDetail() {
   const { id } = useParams();   // ルートパラメータからidを取得
   const [project, setProject] = useState(null);
-  const [csrfToken, setCsrfToken] = useState(null);
-
-    // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
-    useEffect(() => {
-      const fetchCsrfToken = async () => {
-        try {
-          const response = await fetch(`${API_BASE}/api/csrf/`, {
-            method: 'GET',
-            credentials: 'include'
-          });
-          const data = await response.json();
-          if (data.csrfToken) {
-            setCsrfToken(data.csrfToken);
-          } else {
-            console.error('CSRF token not provided in response JSON.');
-          }
-        } catch (error) {
-          console.error('CSRF token fetch error:', error);
-        }
-      };
-      fetchCsrfToken();
-    }, []);
+  const [fetchError, setFetchError] = useState(null);
 
   const fetchProject = useCallback(() => {
+    setFetchError(null);
     fetch(`${API_BASE}/api/projects/${id}/`, {
       method: 'GET',
       credentials: 'include',
@@ -41,15 +21,33 @@ function ProjectDetail() {
         'Content-Type': 'application/json',
       }
     })
-      .then(response => response.json())
-      .then(data => setProject(data))
-      .catch(error => console.error('Error fetching project:', error));
+      .then(async response => {
+        if (!response.ok) {
+          setFetchError({ status: response.status });
+          return;
+        }
+        const data = await response.json();
+        setProject(data);
+      })
+      .catch(error => {
+        console.error('Error fetching project:', error);
+        setFetchError({ message: error.message });
+      });
   }, [id]);
 
   useEffect(() => {
+    setProject(null);
     fetchProject();
   }, [fetchProject]);
 
+  if (fetchError) {
+    return (
+      <p>
+        プロジェクトを読み込めませんでした
+        {fetchError.status ? `（HTTP ${fetchError.status}）` : ''}
+      </p>
+    );
+  }
   if (!project?.id) {
     return <p>Loading...</p>;
   }
