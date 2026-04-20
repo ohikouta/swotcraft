@@ -14,6 +14,10 @@ function ChatComponent({ roomId }) {
 
   // チャット履歴のロード
   useEffect(() => {
+    if (!roomId) {
+      setLoadingHistory(false);
+      return;
+    }
     console.log("Fetching chat history, current user:", user);
     async function fetchChatHistory() {
       try {
@@ -38,6 +42,7 @@ function ChatComponent({ roomId }) {
 
   // WebSocket 接続の処理
   useEffect(() => {
+    if (!roomId) return;
     const wsUrl = import.meta.env.VITE_WS_URL;
     const newSocket = new WebSocket(`${wsUrl}/ws/chat/${roomId}/`);
     setSocket(newSocket);

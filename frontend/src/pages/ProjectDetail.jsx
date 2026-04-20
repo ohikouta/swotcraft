@@ -48,7 +48,7 @@ function ProjectDetail() {
       .catch(error => console.error('Error fetching project:', error));
   }, [id]);
 
-  if (!project) {
+  if (!project?.id) {
     return <p>Loading...</p>;
   }
 

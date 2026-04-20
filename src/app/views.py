@@ -166,7 +166,7 @@ def get_chat_messages(request, room_id):
     """
     try:
         room = ChatRoom.objects.get(id=room_id)
-    except ChatRoom.DoesNotExist:
+    except (ChatRoom.DoesNotExist, ValueError):
         return Response({"detail": "Chat room not found."}, status=status.HTTP_404_NOT_FOUND)
 
     # メッセージをタイムスタンプ順に取得（古い順に並べる）
