@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { API_BASE } from '../config';
 import InviteMember from './projects/InviteMember';
@@ -11,7 +11,7 @@ function ProjectDetail() {
   const { id } = useParams();   // ルートパラメータからidを取得
   const [project, setProject] = useState(null);
   const [csrfToken, setCsrfToken] = useState(null);
-  
+
     // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
     useEffect(() => {
       const fetchCsrfToken = async () => {
@@ -33,14 +33,12 @@ function ProjectDetail() {
       fetchCsrfToken();
     }, []);
 
-  useEffect(() => {
-    // 例: Django REST Frameworkのエンドポイントが /api/projects/:id の場合
+  const fetchProject = useCallback(() => {
     fetch(`${API_BASE}/api/projects/${id}/`, {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken,
       }
     })
       .then(response => response.json())
@@ -48,7 +46,11 @@ function ProjectDetail() {
       .catch(error => console.error('Error fetching project:', error));
   }, [id]);
 
-  if (!project) {
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
+
+  if (!project?.id) {
     return <p>Loading...</p>;
   }
 
@@ -71,7 +73,7 @@ function ProjectDetail() {
         <p>メンバーはいません</p>
       )}
       <p>メンバーを追加</p>
-      <InviteMember projectId={id} />
+      <InviteMember projectId={id} onInvited={fetchProject} />
 
       <h3>SWOT分析</h3>
       {/* SWOT編集ページへのリンクを追加 */}
