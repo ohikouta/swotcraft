@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { API_BASE } from '../config';
 import InviteMember from './projects/InviteMember';
@@ -10,33 +10,10 @@ import Footer from '../components/Footer';
 function ProjectDetail() {
   const { id } = useParams();   // ルートパラメータからidを取得
   const [project, setProject] = useState(null);
-  const [csrfToken, setCsrfToken] = useState(null);
   const [fetchError, setFetchError] = useState(null);
-  
-    // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
-    useEffect(() => {
-      const fetchCsrfToken = async () => {
-        try {
-          const response = await fetch(`${API_BASE}/api/csrf/`, {
-            method: 'GET',
-            credentials: 'include'
-          });
-          const data = await response.json();
-          if (data.csrfToken) {
-            setCsrfToken(data.csrfToken);
-          } else {
-            console.error('CSRF token not provided in response JSON.');
-          }
-        } catch (error) {
-          console.error('CSRF token fetch error:', error);
-        }
-      };
-      fetchCsrfToken();
-    }, []);
 
-  useEffect(() => {
+  const fetchProject = useCallback(() => {
     setFetchError(null);
-    setProject(null);
     fetch(`${API_BASE}/api/projects/${id}/`, {
       method: 'GET',
       credentials: 'include',
@@ -57,6 +34,11 @@ function ProjectDetail() {
         setFetchError({ message: error.message });
       });
   }, [id]);
+
+  useEffect(() => {
+    setProject(null);
+    fetchProject();
+  }, [fetchProject]);
 
   if (fetchError) {
     return (
@@ -89,7 +71,7 @@ function ProjectDetail() {
         <p>メンバーはいません</p>
       )}
       <p>メンバーを追加</p>
-      <InviteMember projectId={id} />
+      <InviteMember projectId={id} onInvited={fetchProject} />
 
       <h3>SWOT分析</h3>
       {/* SWOT編集ページへのリンクを追加 */}

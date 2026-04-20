@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE } from '../../config';
 
 
-function InviteMember({ projectId, token }) {
+function InviteMember({ projectId, onInvited }) {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
   const [csrfToken, setCsrfToken] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   
   // CSRFトークンをバックエンドの /api/csrf/ エンドポイントから取得
   useEffect(() => {
@@ -45,22 +47,37 @@ function InviteMember({ projectId, token }) {
       .catch(error => console.error('Error fetching users:', error));
   }, [csrfToken]);
 
-  const handleInvite = () => {
-    fetch(`${API_BASE}/api/projects/${projectId}/invite-member/`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken,
-      },
-      body: JSON.stringify({ user_id: selectedUser })
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        // 招待が成功した場合の処理
-      })
-      .catch(error => console.error('Error inviting user:', error));
+  const handleInvite = async () => {
+    if (!selectedUser) {
+      setFeedback({ type: 'error', text: 'ユーザーを選択してください' });
+      return;
+    }
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const response = await fetch(`${API_BASE}/api/projects/${projectId}/invite-member/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({ user_id: selectedUser })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) {
+        setFeedback({ type: 'success', text: data.detail || 'ユーザーを招待しました' });
+        setSelectedUser('');
+        onInvited?.();
+      } else {
+        setFeedback({ type: 'error', text: data.detail || `招待に失敗しました (HTTP ${response.status})` });
+      }
+    } catch (error) {
+      console.error('Error inviting user:', error);
+      setFeedback({ type: 'error', text: 'ネットワークエラーで招待できませんでした' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -74,7 +91,20 @@ function InviteMember({ projectId, token }) {
           </option>
         ))}
       </select>
-      <button onClick={handleInvite}>招待する</button>
+      <button onClick={handleInvite} disabled={submitting}>
+        {submitting ? '招待中...' : '招待する'}
+      </button>
+      {feedback && (
+        <p
+          role="status"
+          style={{
+            color: feedback.type === 'success' ? 'green' : 'crimson',
+            marginTop: '8px',
+          }}
+        >
+          {feedback.text}
+        </p>
+      )}
     </div>
   );
 }
