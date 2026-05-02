@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "standards": [
+    {
+      "source": "catalog/claude-md/project-generic.md",
+      "dest": "CLAUDE.md",
+      "fetched_at": "2026-05-02T07:42:59Z",
+      "source_sha": "aaae7028bea197737d42ea9a2a272b565fb287f0d66acf628f9a5d1ead984ab3"
+    },
+    {
+      "source": "catalog/guidelines/git-workflow.md",
+      "dest": "docs/standards/git-workflow.md",
+      "fetched_at": "2026-05-01T00:14:11Z",
+      "source_sha": "8d0e3036b6b75767d85fe89be9fbcef79d4ba41cf1060d1094b41f9a240e3827"
+    },
+    {
+      "source": "catalog/hooks/pre-push-protect-main",
+      "dest": ".githooks/pre-push",
+      "fetched_at": "2026-04-30T23:19:14Z",
+      "source_sha": "a4a03eda5233d2c8b2e4a824e62a37c0e13c4ec8e29a2803b3368d38bfcc8c73"
+    },
+    {
+      "source": "catalog/skills/gcal-event-register",
+      "dest": ".claude/skills/gcal-event-register",
+      "fetched_at": "2026-05-01T00:14:10Z",
+      "source_sha": "c6e42461182bbba8c0ed3b9941cd02e03ab5210038c5d8aab882f69df2fb6690"
+    },
+    {
+      "source": "catalog/skills/notify-slack",
+      "dest": ".claude/skills/notify-slack",
+      "fetched_at": "2026-04-30T23:19:14Z",
+      "source_sha": "9593b950d5fd3d749d4fb43b7364711260226b928d83132eaae34aaaa3d8fa3d"
+    },
+    {
+      "source": "catalog/skills/task-board-sync",
+      "dest": ".claude/skills/task-board-sync",
+      "fetched_at": "2026-05-02T07:43:01Z",
+      "source_sha": "e238efba3fd2bbb0b4c76f082fe83ab317aabc9fcf5941d7398e4d57a004cdc1"
+    }
+  ]
+}
