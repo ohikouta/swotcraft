@@ -1,0 +1,24 @@
+#!/bin/sh
+# pre-push-protect-main — main への直接 push を拒否する
+#
+# 設置手順（プロジェクト側）:
+#   bash ~/mgmt-team/platform-standards/scripts/ps-fetch.sh \
+#     catalog/hooks/pre-push-protect-main --dest .githooks
+#   chmod +x .githooks/pre-push
+#   git config core.hooksPath .githooks
+
+remote_name="$1"
+remote_url="$2"
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  case "$remote_ref" in
+    refs/heads/main)
+      echo "Direct push to main is blocked in this repository."
+      echo "Use a feature branch and open a pull request instead."
+      exit 1
+      ;;
+  esac
+done
+
+exit 0

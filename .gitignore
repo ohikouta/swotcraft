@@ -23,3 +23,9 @@ src/staticfiles/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# claude local-only project notes
+CLAUDE.local.md
+
+# claude local-only settings (per-developer MCP/IDE)
+.claude/settings.local.json
